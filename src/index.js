@@ -44,7 +44,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/caregivers', require('./routes/caregiverRoutes'));
-app.use('/api/members', require('./routes/memberRoutes'));
+app.use('/api/protected-members', require('./routes/memberRoutes'));
 
 // Start Server
 app.listen(PORT, () => {

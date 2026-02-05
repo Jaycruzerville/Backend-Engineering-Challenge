@@ -46,7 +46,7 @@ router.use(authMiddleware); // Protect all member routes
 
 /**
  * @swagger
- * /members:
+ * /protected-members:
  *   post:
  *     summary: Create a new protected member
  *     tags: [Members]
@@ -68,7 +68,7 @@ router.post('/', memberController.createMember);
 
 /**
  * @swagger
- * /members:
+ * /protected-members:
  *   get:
  *     summary: List all members for the authenticated caregiver
  *     tags: [Members]
@@ -88,8 +88,8 @@ router.get('/', memberController.getMembers);
 
 /**
  * @swagger
- * /members/{id}:
- *   put:
+ * /protected-members/{id}:
+ *   patch:
  *     summary: Update a member
  *     tags: [Members]
  *     security:
@@ -113,11 +113,11 @@ router.get('/', memberController.getMembers);
  *       404:
  *         description: Member not found
  */
-router.put('/:id', memberController.updateMember);
+router.patch('/:id', memberController.updateMember);
 
 /**
  * @swagger
- * /members/{id}:
+ * /protected-members/{id}:
  *   delete:
  *     summary: Delete a member
  *     tags: [Members]

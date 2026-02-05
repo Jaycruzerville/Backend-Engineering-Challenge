@@ -85,7 +85,7 @@ The project follows a **Layered Architecture**:
     *   *Self-healing*: If email exists in Mongo but not Supabase, updates Mongo record.
 
 2.  **Member Creation**:
-    *   Authenticated Caregiver POSTs to `/api/members`.
+    *   Authenticated Caregiver POSTs to `/api/protected-members`.
     *   Server validates token and data.
     *   Member saved to MongoDB.
     *   **Event Emitted**: `[TIMESTAMP] EVENT: member_added — { ... }`

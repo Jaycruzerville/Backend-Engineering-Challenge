@@ -53,7 +53,7 @@ const run = async () => {
 
         // 3. User B creates a Member
         console.log('User B creating a private member...');
-        const memberRes = await axios.post(`${API_URL}/members`, {
+        const memberRes = await axios.post(`${API_URL}/protected-members`, {
             firstName: 'Private',
             lastName: 'Member',
             relationship: 'Self',
@@ -65,7 +65,7 @@ const run = async () => {
         // 4. User A attempts to access User B's member (GET)
         console.log('User A attempting to read User B\'s member...');
         try {
-            await axios.get(`${API_URL}/members`, configA);
+            await axios.get(`${API_URL}/protected-members`, configA);
             // We expect the list to NOT contain victimMemberId
             // Actually, querying GET /members scopes to logged in user, so it should return EMPTY list (or own members)
         } catch (err) {
@@ -75,7 +75,7 @@ const run = async () => {
         // Test Specific Access (Update/Delete)
         console.log('User A attempting to UPDATE User B\'s member...');
         try {
-            await axios.put(`${API_URL}/members/${victimMemberId}`, { firstName: 'HACKED' }, configA);
+            await axios.patch(`${API_URL}/protected-members/${victimMemberId}`, { firstName: 'HACKED' }, configA);
             console.error('❌ FAILURE: User A was able to update User B\'s member!');
             process.exit(1);
         } catch (err) {
