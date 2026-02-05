@@ -16,6 +16,9 @@ const loginSchema = z.object({
 });
 
 exports.signup = async (req, res) => {
+  let authUser;
+  let authSession;
+  
   try {
     const { email, password, name } = signupSchema.parse(req.body);
 
@@ -35,20 +38,23 @@ exports.signup = async (req, res) => {
     if (!authData.user) {
          return res.status(500).json({ message: 'Signup failed to return user data' });
     }
+    
+    authUser = authData.user;
+    authSession = authData.session;
 
     // 2. Create Caregiver in MongoDB
     const caregiver = await Caregiver.create({
-      supabaseId: authData.user.id,
-      email: authData.user.email,
+      supabaseId: authUser.id,
+      email: authUser.email,
       name,
     });
 
-    logger.info(`New caregiver registered: ${email}`);
+    logger.info(`New caregiver registered: ${email} with Supabase ID: ${authUser.id}`);
     
     res.status(201).json({ 
       message: 'Caregiver registered successfully', 
       caregiver: { id: caregiver._id, name: caregiver.name, email: caregiver.email },
-      session: authData.session 
+      session: authSession 
     });
 
   } catch (error) {
@@ -56,6 +62,29 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: 'Validation Error', errors: error.errors });
     }
     logger.error(`Signup Error: ${error.message}`);
+    
+    // Handle duplicate email in Mongo but new in Supabase (Sync issue)
+    if ((error.message.includes('E11000') || error.code === 11000) && authUser) {
+        try {
+            const { email } = req.body;
+            logger.info(`Attempting to sync Caregiver ${email} with new Supabase ID...`);
+            const updated = await Caregiver.findOneAndUpdate(
+                { email },
+                { supabaseId: authUser.id },
+                { new: true }
+            );
+            if (updated) {
+                 logger.info(`Synced Caregiver ${email} successfully.`);
+                 return res.status(200).json({ 
+                    message: 'Caregiver synced successfully', 
+                    caregiver: { id: updated._id, name: updated.name, email: updated.email },
+                    session: authSession 
+                  });
+            }
+        } catch (syncError) {
+             logger.error(`Sync Error: ${syncError.message}`);
+        }
+    }
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };

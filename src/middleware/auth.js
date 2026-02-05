@@ -20,11 +20,22 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Find the caregiver in our MongoDB that matches this Supabase user
-    const caregiver = await Caregiver.findOne({ supabaseId: user.id });
+    let caregiver = await Caregiver.findOne({ supabaseId: user.id });
 
     if (!caregiver) {
-       logger.warn(`Caregiver not found in DB for Supabase ID: ${user.id}`);
-       return res.status(404).json({ message: 'Caregiver profile not found' });
+       // Self-healing: Check if user exists by email (legacy/mismatch case)
+       // This handles cases where Supabase user was recreated but Mongo record persists
+       logger.warn(`Caregiver not found by ID: ${user.id}. Checking by email: ${user.email}`);
+       caregiver = await Caregiver.findOne({ email: user.email });
+       
+       if (caregiver) {
+           logger.info(`Found caregiver by email. Updating Supabase ID to ${user.id}`);
+           caregiver.supabaseId = user.id;
+           await caregiver.save();
+       } else {
+           logger.warn(`Caregiver not found in DB for Supabase ID: ${user.id}`);
+           return res.status(404).json({ message: 'Caregiver profile not found' });
+       }
     }
 
     req.user = caregiver; // Attach the Mongoose document to req.user
