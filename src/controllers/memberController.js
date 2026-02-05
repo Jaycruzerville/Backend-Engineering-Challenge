@@ -17,7 +17,7 @@ const logEvent = (eventType, payload) => {
   console.log(`[${timestamp}] EVENT: ${eventType} — ${JSON.stringify(payload)}`);
 };
 
-exports.createMember = async (req, res) => {
+exports.createMember = async (req, res, next) => {
   try {
     const data = memberSchema.parse(req.body);
 
@@ -30,25 +30,20 @@ exports.createMember = async (req, res) => {
     
     res.status(201).json(member);
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
-    }
-    logger.error(`Create Member Error: ${error.message}`);
-    res.status(500).json({ message: 'Internal Server Error' });
+    next(error);
   }
 };
 
-exports.getMembers = async (req, res) => {
+exports.getMembers = async (req, res, next) => {
   try {
     const members = await Member.find({ caregiverId: req.user._id });
     res.json(members);
   } catch (error) {
-    logger.error(`Get Members Error: ${error.message}`);
-    res.status(500).json({ message: 'Internal Server Error' });
+    next(error);
   }
 };
 
-exports.updateMember = async (req, res) => {
+exports.updateMember = async (req, res, next) => {
   try {
     const { id } = req.params;
     const data = memberSchema.partial().parse(req.body);
@@ -67,15 +62,11 @@ exports.updateMember = async (req, res) => {
 
     res.json(member);
   } catch (error) {
-     if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
-    }
-    logger.error(`Update Member Error: ${error.message}`);
-    res.status(500).json({ message: 'Internal Server Error' });
+    next(error);
   }
 };
 
-exports.deleteMember = async (req, res) => {
+exports.deleteMember = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -89,7 +80,6 @@ exports.deleteMember = async (req, res) => {
 
     res.json({ message: 'Member deleted successfully' });
   } catch (error) {
-    logger.error(`Delete Member Error: ${error.message}`);
-    res.status(500).json({ message: 'Internal Server Error' });
+    next(error);
   }
 };

@@ -46,6 +46,9 @@ app.get('/', (req, res) => {
 app.use('/api/caregivers', require('./routes/caregiverRoutes'));
 app.use('/api/protected-members', require('./routes/memberRoutes'));
 
+// Error Handling Middleware
+app.use(require('./middleware/errorHandler'));
+
 // Start Server
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);

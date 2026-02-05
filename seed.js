@@ -23,6 +23,12 @@ const MEMBERS = [
     relationship: 'Parent',
     birthYear: 1950,
   },
+  {
+    firstName: 'Baby',
+    lastName: 'Three',
+    relationship: 'Child',
+    birthYear: 2024,
+  },
 ];
 
 const run = async () => {
@@ -55,7 +61,7 @@ const run = async () => {
             console.log('Login successful');
             authHeader = { Authorization: `Bearer ${loginRes.data.session.access_token}` };
         } catch (err) {
-            if (err.response?.data?.message === 'Invalid credentials') {
+            if (err.response?.data?.message === 'Invalid credentials' || err.response?.status === 400) {
                  console.log('Login failed. HINT: If you just signed up, please confirm your email address and run this script again.');
             }
             throw err;
