@@ -13,8 +13,8 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000/api',
-        description: 'Local Development Server',
+        url: '/api',
+        description: 'API Server',
       },
     ],
     components: {
