@@ -12,17 +12,27 @@ const PORT = process.env.PORT || 3000;
 
 // Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  windowMs: 15 * 60 * 1000, 
+  max: 100, 
+  standardHeaders: true, 
+  legacyHeaders: false, 
   message: { message: 'Too many requests, please try again later.' },
 });
 
+// Swagger Docs using /api-docs to avoid rate limiting ideally, but putting it before limiter or configuring properly
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger');
+
 // Middleware
-app.use(limiter); // Apply rate limiting to all requests
 app.use(cors());
 app.use(express.json());
+
+// Swagger Route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
+// Apply rate limiting to API routes, not necessarily documentation if we want
+app.use('/api', limiter); 
+
 
 // Connect to Database
 connectDB();
