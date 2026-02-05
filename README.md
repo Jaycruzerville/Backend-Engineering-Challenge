@@ -54,7 +54,8 @@ A robust, real-time Caregiver Management API built with **Node.js (Express)**, *
     ```
 
 5.  **View Documentation**:
-    Open [http://localhost:3000/api-docs](http://localhost:3000/api-docs) to see the Swagger UI.
+    *   **Live Demo**: [https://backend-engineering-challenge-production.up.railway.app/api-docs/](https://backend-engineering-challenge-production.up.railway.app/api-docs/)
+    *   **Local**: [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
 ## 🧪 Verification
 Run the included seed script to verify the entire flow (Signup -> Login -> Add Members):
