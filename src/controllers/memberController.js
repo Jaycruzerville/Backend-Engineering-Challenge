@@ -1,0 +1,95 @@
+const Member = require('../models/Member');
+const logger = require('../utils/logger');
+const { z } = require('zod');
+
+// Schema Validation
+const memberSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  relationship: z.string().min(1),
+  birthYear: z.number().int().min(1900).max(new Date().getFullYear()),
+  status: z.enum(['active', 'inactive']).optional(),
+});
+
+// Helper for Real-time Log Simulation
+const logEvent = (eventType, payload) => {
+  const timestamp = new Date().toISOString().replace('T', ' ').split('.')[0];
+  console.log(`[${timestamp}] EVENT: ${eventType} — ${JSON.stringify(payload)}`);
+};
+
+exports.createMember = async (req, res) => {
+  try {
+    const data = memberSchema.parse(req.body);
+
+    const member = await Member.create({
+      ...data,
+      caregiverId: req.user._id,
+    });
+
+    logEvent('member_added', { caregiverId: req.user._id, memberId: member._id });
+    
+    res.status(201).json(member);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
+    }
+    logger.error(`Create Member Error: ${error.message}`);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+exports.getMembers = async (req, res) => {
+  try {
+    const members = await Member.find({ caregiverId: req.user._id });
+    res.json(members);
+  } catch (error) {
+    logger.error(`Get Members Error: ${error.message}`);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+exports.updateMember = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = memberSchema.partial().parse(req.body);
+
+    const member = await Member.findOneAndUpdate(
+      { _id: id, caregiverId: req.user._id },
+      data,
+      { new: true }
+    );
+
+    if (!member) {
+      return res.status(404).json({ message: 'Member not found' });
+    }
+
+    logEvent('member_updated', { caregiverId: req.user._id, memberId: member._id });
+
+    res.json(member);
+  } catch (error) {
+     if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
+    }
+    logger.error(`Update Member Error: ${error.message}`);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+exports.deleteMember = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const member = await Member.findOneAndDelete({ _id: id, caregiverId: req.user._id });
+
+    if (!member) {
+      return res.status(404).json({ message: 'Member not found' });
+    }
+
+    logEvent('member_removed', { caregiverId: req.user._id, memberId: member._id });
+
+    res.json({ message: 'Member deleted successfully' });
+  } catch (error) {
+    logger.error(`Delete Member Error: ${error.message}`);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};

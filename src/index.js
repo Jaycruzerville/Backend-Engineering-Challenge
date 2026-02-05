@@ -21,6 +21,10 @@ app.get('/', (req, res) => {
   res.send('OneHaven Backend Challenge API is running');
 });
 
+// Routes
+app.use('/api/caregivers', require('./routes/caregiverRoutes'));
+app.use('/api/members', require('./routes/memberRoutes'));
+
 // Start Server
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
