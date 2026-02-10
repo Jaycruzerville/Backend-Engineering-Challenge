@@ -35,7 +35,9 @@ app.use('/api', limiter);
 
 
 // Connect to Database
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+}
 
 // Basic Route
 app.get('/', (req, res) => {
@@ -50,6 +52,10 @@ app.use('/api/protected-members', require('./routes/memberRoutes'));
 app.use(require('./middleware/errorHandler'));
 
 // Start Server
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
