@@ -118,5 +118,12 @@ exports.login = async (req, res) => {
 };
 
 exports.getMe = async (req, res) => {
-  res.json({ caregiver: req.user });
+  const { _id, name, email } = req.user;
+  res.json({ 
+    caregiver: {
+      id: _id,
+      name,
+      email
+    }
+  });
 };
